@@ -1,100 +1,52 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Test.Hspec.Formatters.Codewars
-    (
-      codewars
-    ) where
+  (
+    codewars
+  ) where
 
-import System.IO (Handle)
-import Control.Exception (SomeException)
-import Control.Monad (unless, join, forM_)
-import Text.Printf (printf)
-import Data.List (intercalate)
+import Data.Text (pack, unpack, replace)
 
-import Data.List.Split (splitOn)
-
-import Test.Hspec.Core.Spec (Progress)
-import Test.Hspec.Runner (Path)
-import Test.Hspec.Formatters (Formatter (..), FormatM,
-                              FailureRecord (..), FailureReason (..),
-                              getRealTime,
+import Test.Hspec.Formatters (Formatter (..),
+                              FailureReason (..),
                               formatException,
-                              write, writeLine)
+                              silent,
+                              writeLine)
 
 codewars :: Formatter
-codewars = Formatter
-    { headerFormatter = headerFormatter'
-    , footerFormatter = footerFormatter'
-    , exampleGroupStarted = exampleGroupStarted'
-    , exampleGroupDone = exampleGroupDone'
-    , examplePending = examplePending'
-    , exampleSucceeded = exampleSucceeded'
-    , exampleFailed = exampleFailed'
-    , exampleProgress = exampleProgress'
-    , failedFormatter = failedFormatter'
-    }
-
--- https://hackage.haskell.org/package/hspec-core-2.4.4/docs/Test-Hspec-Core-Formatters.html
-
-headerFormatter' :: FormatM ()
-headerFormatter' = return ()
-
-footerFormatter' :: FormatM ()
-footerFormatter' = return ()
-
--- evaluated before each test group
-exampleGroupStarted' :: [String] -> String -> FormatM ()
-exampleGroupStarted' = \nesting name -> do
+codewars = silent {
+  exampleGroupStarted = \_ name -> do
     writeLine ""
-    writeLine' $ join $ ["<DESCRIBE::>", name]
+    writeLine $ escapeLF $ "<DESCRIBE::>" ++ name
 
--- evaluated after each test group
-exampleGroupDone' :: FormatM ()
-exampleGroupDone' = writeLine "\n<COMPLETEDIN::>"
+, exampleGroupDone = writeLine "\n<COMPLETEDIN::>"
 
--- evaluated after each successful example
-exampleSucceeded' :: Path -> FormatM ()
-exampleSucceeded' = \(_, requirement) -> do
+, exampleSucceeded = \(_, name) _ -> do
     writeLine ""
-    writeLine' $ join ["<IT::>", requirement]
+    writeLine $ escapeLF $ "<IT::>" ++ name
     writeLine "\n<PASSED::>Test Passed"
     writeLine "\n<COMPLETEDIN::>"
 
--- evaluated after each failed example
-exampleFailed' :: Path -> Either SomeException FailureReason -> FormatM ()
-exampleFailed' = \(_, requirement) reason -> do
+, exampleFailed = \(_, name) _ reason -> do
     writeLine ""
-    writeLine' $ join ["<IT::>", requirement]
+    writeLine $ escapeLF $ "<IT::>" ++ name
     writeLine ""
-    formatFailure reason
+    writeLine $ escapeLF $ reasonAsString reason
     writeLine "\n<COMPLETEDIN::>"
+}
 
--- evaluated after each pending example
-examplePending' :: Path -> Maybe String -> FormatM ()
-examplePending' = \_ _ -> return ()
+reasonAsString :: FailureReason -> String
+reasonAsString reason =
+  case reason of
+    NoReason -> "<FAILED::>Test Failed"
+    Reason x -> "<FAILED::>" ++ x
+    ExpectedButGot Nothing expected got ->
+      "<FAILED::>Expected " ++ expected ++ " but got " ++ got
+    ExpectedButGot (Just src) expected got ->
+      "<FAILED::>" ++ src ++ " expected " ++ expected ++ " but got " ++ got
+    Error Nothing err ->
+      "<ERROR::>" ++ (formatException err)
+    Error (Just s) err ->
+      "<ERROR::>" ++ s ++ (formatException err)
 
--- Failed test summary
--- evaluated after a test run
-failedFormatter' :: FormatM ()
-failedFormatter' = return ()
-
--- used to notify the progress of the currently evaluated example
--- Only called when interactive/color mode.
-exampleProgress' :: Handle -> Path -> Progress -> IO ()
-exampleProgress' = \_ _ _ -> return ()
-
-writeLine' :: String -> FormatM ()
-writeLine' s = writeLine $ intercalate "<:LF:>" $ splitOn "\n" s
-
-formatFailure :: Either SomeException FailureReason -> FormatM ()
-formatFailure (Left e) = do
-    writeLine ""
-    writeLine' $ ((printf "<ERROR::>%s") . formatException) e
-formatFailure (Right NoReason) = do
-    writeLine ""
-    writeLine "<FAILED::>Test Failed"
-formatFailure (Right (Reason err)) = do
-    writeLine ""
-    writeLine' $ (printf "<FAILED::>%s" err)
-formatFailure (Right (ExpectedButGot preface expected actual)) = do
-    writeLine ""
-    mapM_ writeLine preface
-    writeLine' $ "<FAILED::>Test Failed\nexpected: " ++ expected ++ "\n but got: " ++ actual
+escapeLF :: String -> String
+escapeLF = unpack . replace "\n" "<:LF:>" . pack
