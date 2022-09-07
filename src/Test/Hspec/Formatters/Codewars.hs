@@ -1,38 +1,36 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Test.Hspec.Formatters.Codewars
-  (
-    codewars
-  ) where
 
-import Data.Text (pack, unpack, replace)
+module Test.Hspec.Formatters.Codewars (codewars) where
 
-import Test.Hspec.Formatters (Formatter (..),
-                              FailureReason (..),
-                              formatException,
-                              silent,
-                              writeLine)
+import Data.Text (pack, replace, unpack)
+
+import Test.Hspec.Core.Formatters.V1 (
+  FailureReason (..),
+  Formatter (..),
+  formatException,
+  silent,
+  writeLine,
+ )
 
 codewars :: Formatter
-codewars = silent {
-  exampleGroupStarted = \_ name -> do
-    writeLine ""
-    writeLine $ escapeLF $ "<DESCRIBE::>" ++ name
-
-, exampleGroupDone = writeLine "\n<COMPLETEDIN::>"
-
-, exampleSucceeded = \(_, name) _ -> do
-    writeLine ""
-    writeLine $ escapeLF $ "<IT::>" ++ name
-    writeLine "\n<PASSED::>Test Passed"
-    writeLine "\n<COMPLETEDIN::>"
-
-, exampleFailed = \(_, name) _ reason -> do
-    writeLine ""
-    writeLine $ escapeLF $ "<IT::>" ++ name
-    writeLine ""
-    writeLine $ escapeLF $ reasonAsString reason
-    writeLine "\n<COMPLETEDIN::>"
-}
+codewars =
+  silent
+    { exampleGroupStarted = \_ name -> do
+        writeLine ""
+        writeLine $ escapeLF $ "<DESCRIBE::>" ++ name
+    , exampleGroupDone = writeLine "\n<COMPLETEDIN::>"
+    , exampleSucceeded = \(_, name) _ -> do
+        writeLine ""
+        writeLine $ escapeLF $ "<IT::>" ++ name
+        writeLine "\n<PASSED::>Test Passed"
+        writeLine "\n<COMPLETEDIN::>"
+    , exampleFailed = \(_, name) _ reason -> do
+        writeLine ""
+        writeLine $ escapeLF $ "<IT::>" ++ name
+        writeLine ""
+        writeLine $ escapeLF $ reasonAsString reason
+        writeLine "\n<COMPLETEDIN::>"
+    }
 
 reasonAsString :: FailureReason -> String
 reasonAsString reason =
@@ -44,9 +42,9 @@ reasonAsString reason =
     ExpectedButGot (Just src) expected got ->
       "<FAILED::>" ++ src ++ " expected " ++ expected ++ " but got " ++ got
     Error Nothing err ->
-      "<ERROR::>" ++ (formatException err)
+      "<ERROR::>" ++ formatException err
     Error (Just s) err ->
-      "<ERROR::>" ++ s ++ (formatException err)
+      "<ERROR::>" ++ s ++ formatException err
 
 escapeLF :: String -> String
 escapeLF = unpack . replace "\n" "<:LF:>" . pack
