@@ -23,3 +23,10 @@ main = hspecWith defaultConfig {configFormatter = Just codewars} Spec.spec
 -- test/Spec.hs
 {-# OPTIONS_GHC -F -pgmF hspec-discover -optF --module-name=Spec #-}
 ```
+
+## Development
+
+```shell
+cabal install
+cabal test
+```

@@ -1,0 +1,6 @@
+cradle:
+  cabal:
+    - path: "src"
+      component: "lib:hspec-formatters-codewars"
+    - path: "test"
+      component: "hspec-formatters-codewars:test:hspec-formatters-codewars-spec"

@@ -1,21 +1,36 @@
-cabal-version: >=1.10
-
-name: hspec-formatters-codewars
-version: 0.1.0
-synopsis: Hspec formatter for Codewars
-homepage: https://githuc.com/codewars/hspec-formatters-codewars
-license: MIT
-build-type: Simple
+cabal-version: 2.4
+name:          hspec-formatters-codewars
+version:       0.1.0
+synopsis:      Hspec formatter for Codewars
+homepage:      https://github.com/codewars/hspec-formatters-codewars
+license:       MIT
+build-type:    Simple
 
 library
-  hs-source-dirs:
-      src
+  hs-source-dirs:   src
   build-depends:
-      base ==4.*
-    , hspec ==2.*
-    , hspec-core ==2.*
-    , text ==1.*
-  exposed-modules:
-      Test.Hspec.Formatters.Codewars
-  default-language:
-      Haskell2010
+    , base        >=4   && <5
+    , hspec       >=2.8 && <3
+    , hspec-core  >=2.8 && <3
+    , text        >=2   && <3
+
+  exposed-modules:  Test.Hspec.Formatters.Codewars
+  default-language: GHC2021
+
+test-suite hspec-formatters-codewars-spec
+  type:               exitcode-stdio-1.0
+  default-language:   GHC2021
+  main-is:            Main.hs
+  hs-source-dirs:     test src
+  build-depends:
+    , base        >=4   && <5
+    , hspec       >=2.8 && <3
+    , hspec-core  >=2.8 && <3
+    , text        >=2   && <3
+
+  other-modules:
+    Spec
+    Spec.ExampleSpec
+    Test.Hspec.Formatters.Codewars
+
+  build-tool-depends: hspec-discover:hspec-discover >=2 && <3
