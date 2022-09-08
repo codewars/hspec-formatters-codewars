@@ -2,7 +2,7 @@ cabal-version: 2.4
 name:          hspec-formatters-codewars
 version:       0.1.0
 synopsis:      Hspec formatter for Codewars
-homepage:      https://githuc.com/codewars/hspec-formatters-codewars
+homepage:      https://github.com/codewars/hspec-formatters-codewars
 license:       MIT
 build-type:    Simple
 
