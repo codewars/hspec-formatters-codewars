@@ -27,6 +27,6 @@ main = hspecWith defaultConfig {configFormatter = Just codewars} Spec.spec
 ## Development
 
 ```shell
-cabal install
-cabal test
+stack build
+stack test
 ```

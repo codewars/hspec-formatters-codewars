@@ -1,4 +1,4 @@
-module Spec.ExampleSpec where
+module ExampleSpec where
 
 import Test.Hspec
 
