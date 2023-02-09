@@ -1,5 +1,5 @@
 name:     hspec-formatters-codewars
-version:  0.2.0
+version:  0.2.1
 github:   "codewars/hspec-formatters-codewars"
 license:  MIT
 synopsis: Hspec formatter for Codewars
