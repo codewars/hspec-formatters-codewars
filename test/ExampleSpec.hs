@@ -1,6 +1,7 @@
 module ExampleSpec where
 
 import Test.Hspec
+import Test.QuickCheck
 
 spec :: Spec
 spec = describe "ExampleSpec" $ do
@@ -34,3 +35,10 @@ spec = describe "ExampleSpec" $ do
       read "10" `shouldBe` (10 :: Int)
     it "Can present multiline assertions" $ do
       (show 10) `shouldBe`  "10, but\nbroken into\nmultiple lines"
+  describe "QuickCheck tests" $ do
+    it "passes for random ints" $ do
+      property $ \ n -> do
+        ((read (show n))::Int) `shouldBe` (n :: Int)
+    it "fails for random ints" $ do
+      property $ \ n -> do
+        ((read (show n))::Int) `shouldBe` ((if n < 50 then n else n + 1) :: Int)
