@@ -1,19 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Test.Hspec.Formatters.Codewars (codewars) where
-
 import Data.Text (pack, replace, unpack)
+import Text.Printf (printf)
 
 import Test.Hspec.Core.Util (
-  Path,
-  joinPath
+  Path
  )
 
 import Test.Hspec.Core.Formatters.V2 (
   FailureReason (..),
-  Formatter (..),
-  Item (..),
-  Result (..),
+  Formatter     (..),
+  Item          (..),
+  Seconds       (..),
+  Result        (..),
   formatException,
   silent,
   writeLine
@@ -22,32 +22,34 @@ import Test.Hspec.Core.Formatters.V2 (
 getName :: Path -> String
 getName (_, req) = escapeLF req
 
+
 codewars :: Formatter
 codewars =
   silent
     {
-		 formatterGroupStarted = \path -> do
-			writeLine ""
-			writeLine $ escapeLF $ "<DESCRIBE::>" ++ (getName path)
-		,formatterGroupDone = \_ -> do
-			writeLine ""
-			writeLine $ "<COMPLETEDIN::>"
-		,formatterItemStarted = \path -> do
-			writeLine ""
-			writeLine $ escapeLF $ "<IT::>" ++ (getName path)
-		,formatterItemDone = \path item -> do
-			writeLine ""
-			writeLine $ reportItem item
-			writeLine ""
-			writeLine $ "<COMPLETEDIN::> " ++ (show $ itemDuration item)
+      formatterGroupStarted = \path -> do
+        writeLine ""
+        writeLine $ escapeLF $ "<DESCRIBE::>" ++ (getName path)
+      ,formatterGroupDone = \_ -> do
+        writeLine ""
+        writeLine $ "<COMPLETEDIN::>"
+      ,formatterItemStarted = \path -> do
+        writeLine ""
+        writeLine $ escapeLF $ "<IT::>" ++ (getName path)
+      ,formatterItemDone = \_ item -> do
+        writeLine ""
+        writeLine $ reportItem item
+        writeLine ""
+        writeLine $ "<COMPLETEDIN::>" ++ (formatSeconds $ itemDuration item)
     }
 
 reportItem :: Item -> String
 reportItem item =
-	case itemResult item of
-		Success -> "<PASSED::>Test Passed"
-		Pending _ _ -> "\nPENDING"
-		Failure _ reason -> reasonAsString reason
+  case itemResult item of
+    Success -> "<PASSED::>Test Passed"
+    Failure _ reason -> reasonAsString reason
+    Pending _  Nothing -> "<FAILED::>Test pending"
+    Pending _  (Just msg) -> "<FAILED::>Test pending: " ++ (escapeLF msg)
 
 reasonAsString :: FailureReason -> String
 reasonAsString reason =
@@ -62,6 +64,10 @@ reasonAsString reason =
       "<ERROR::>" ++ (escapeLF $ formatException err)
     Error (Just s) err ->
       "<ERROR::>" ++ (escapeLF s) ++ (escapeLF $ formatException err)
+
+
+formatSeconds :: Seconds -> String
+formatSeconds = printf "%.3f"
 
 escapeLF :: String -> String
 escapeLF = unpack . replace "\n" "<:LF:>" . pack
