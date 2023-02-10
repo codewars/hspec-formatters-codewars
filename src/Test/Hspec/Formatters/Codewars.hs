@@ -48,7 +48,7 @@ reportItem item =
   case itemResult item of
     Success -> "<PASSED::>Test Passed"
     Failure _ reason -> reasonAsString reason
-    Pending _  Nothing -> "<FAILED::>Test pending"
+    Pending _  Nothing -> "<FAILED::>Test pending: no reason given"
     Pending _  (Just msg) -> "<FAILED::>Test pending: " ++ (escapeLF msg)
 
 reasonAsString :: FailureReason -> String
@@ -57,13 +57,13 @@ reasonAsString reason =
     NoReason -> "<FAILED::>Test Failed"
     Reason x -> "<FAILED::>" ++ (escapeLF x)
     ExpectedButGot Nothing expected got ->
-      "<FAILED::>Expected " ++ (escapeLF expected) ++ " but got " ++ (escapeLF got)
+      "<FAILED::>expected: " ++ (escapeLF expected) ++ "<:LF:> but got: " ++ (escapeLF got)
     ExpectedButGot (Just src) expected got ->
-      "<FAILED::>" ++ (escapeLF src) ++ " expected " ++ (escapeLF expected) ++ " but got " ++ (escapeLF got)
+      "<FAILED::>" ++ (escapeLF src) ++ "<:LF:>expected: " ++ (escapeLF expected) ++ "<:LF:> but got: " ++ (escapeLF got)
     Error Nothing err ->
-      "<ERROR::>" ++ (escapeLF $ formatException err)
+      "<ERROR::>uncaught exception: " ++ (escapeLF $ formatException err)
     Error (Just s) err ->
-      "<ERROR::>" ++ (escapeLF s) ++ (escapeLF $ formatException err)
+      "<ERROR::>" ++ (escapeLF s) ++ "<:LF:>" ++ (escapeLF $ formatException err)
 
 
 formatSeconds :: Seconds -> String
