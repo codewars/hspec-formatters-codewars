@@ -14,6 +14,9 @@ spec = describe "ExampleSpec" $ do
       read "10" `shouldBe` (11 :: Int)
     it "can parse floating-point numbers and fail" $ do
       read "2.5" `shouldBe` (2.6 :: Float)
+    it "explicitly trigerred error" $ do
+      error "This test fails with an error"
+      read "10" `shouldBe` (10 :: Int)
   describe "Crashing tests" $ do
     it "can parse integers and crash" $ do
       read (last $ tail $ [ "10" ]) `shouldBe` (11 :: Int)
