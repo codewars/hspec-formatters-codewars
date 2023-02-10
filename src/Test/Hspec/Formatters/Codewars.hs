@@ -40,7 +40,7 @@ codewars =
         writeLine ""
         writeLine $ reportItem item
         writeLine ""
-        writeLine $ "<COMPLETEDIN::>" ++ (formatSeconds $ itemDuration item)
+        writeLine $ "<COMPLETEDIN::>" ++ (formatToMillis $ itemDuration item)
     }
 
 reportItem :: Item -> String
@@ -66,8 +66,8 @@ reasonAsString reason =
       "<ERROR::>" ++ (escapeLF s) ++ "<:LF:>" ++ (escapeLF $ formatException err)
 
 
-formatSeconds :: Seconds -> String
-formatSeconds = printf "%.3f"
+formatToMillis :: Seconds -> String
+formatToMillis (Seconds s) = printf "%.3f" (s * 1000)
 
 escapeLF :: String -> String
 escapeLF = unpack . replace "\n" "<:LF:>" . pack
