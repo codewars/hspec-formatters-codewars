@@ -29,3 +29,5 @@ spec = describe "ExampleSpec" $ do
   describe "Can present\nmultiline titles\nof groups" $ do
     it "Can present\nmultiline titles\nof items" $ do
       read "10" `shouldBe` (10 :: Int)
+    it "Can present multiline assertions" $ do
+      (show 10) `shouldBe`  "10, but\nbroken into\nmultiple lines"
