@@ -2,7 +2,7 @@ module Main (main) where
 
 import Test.Hspec.Runner
 import Test.Hspec.Formatters.Codewars (codewars)
-import Test.Hspec.Core.Formatters.V1 (formatterToFormat)
+import Test.Hspec.Core.Formatters.V2 (formatterToFormat)
 
 import qualified Spec
 
