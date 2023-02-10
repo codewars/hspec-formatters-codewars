@@ -29,13 +29,13 @@ codewars =
     {
       formatterGroupStarted = \path -> do
         writeLine ""
-        writeLine $ escapeLF $ "<DESCRIBE::>" ++ (getName path)
+        writeLine $ "<DESCRIBE::>" ++ (getName path)
       ,formatterGroupDone = \_ -> do
         writeLine ""
         writeLine $ "<COMPLETEDIN::>"
       ,formatterItemStarted = \path -> do
         writeLine ""
-        writeLine $ escapeLF $ "<IT::>" ++ (getName path)
+        writeLine $ "<IT::>" ++ (getName path)
       ,formatterItemDone = \_ item -> do
         writeLine ""
         writeLine $ reportItem item
