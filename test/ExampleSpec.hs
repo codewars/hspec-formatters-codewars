@@ -23,8 +23,6 @@ spec = describe "ExampleSpec" $ do
       read (last $ tail $ [ "10" ]) `shouldBe` (11 :: Int)
     it "can parse floating-point numbers and crash" $ do
       read (last $ tail $ [ "2.5" ]) `shouldBe` (2.6 :: Float)
---    it ("can parse item title " ++ (show $ ((read "cant parse this")::Int)) ++ " and crash") $ do
---      read "2.5" `shouldBe` (2.5 :: Float)
   describe "Pending tests" $ do
     it "not implemented" $ do
       pending
@@ -42,3 +40,6 @@ spec = describe "ExampleSpec" $ do
     it "fails for random ints" $ do
       property $ \ n -> do
         ((read (show n))::Int) `shouldBe` ((if n < 50 then n else n + 1) :: Int)
+  describe "Can crash whole test suite" $ do
+    it ("can parse item title " ++ (show $ ((read "cant parse this")::Int)) ++ " and crash") $ do
+      read "2.5" `shouldBe` (2.5 :: Float)
