@@ -34,7 +34,7 @@ codewars = do
         writeLine ""
         startedOn <- getRealTime
         liftIO $ modifyIORef times (\ts -> startedOn : ts)
-        writeLine $ escapeLF $ "<DESCRIBE::>" ++ (getName path)
+        writeLine $ "<DESCRIBE::>" ++ (getName path)
       ,formatterGroupDone = \_ -> do
         writeLine ""
         ts <- liftIO $ readIORef times
@@ -45,7 +45,7 @@ codewars = do
         liftIO $ modifyIORef times tail
       ,formatterItemStarted = \path -> do
         writeLine ""
-        writeLine $ escapeLF $ "<IT::>" ++ (getName path)
+        writeLine $ "<IT::>" ++ (getName path)
       ,formatterItemDone = \_ item -> do
         writeLine ""
         writeLine $ reportItem item
