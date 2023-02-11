@@ -3,6 +3,8 @@
 module Test.Hspec.Formatters.Codewars (codewars) where
 import Data.Text (pack, replace, unpack)
 import Text.Printf (printf)
+import Data.IORef
+import Control.Monad.IO.Class
 
 import Test.Hspec.Core.Util (
   Path
@@ -16,26 +18,34 @@ import Test.Hspec.Core.Formatters.V2 (
   Result        (..),
   formatException,
   silent,
-  writeLine
+  writeLine,
+  getRealTime
  )
 
 getName :: Path -> String
 getName (_, req) = escapeLF req
 
-
-codewars :: Formatter
-codewars =
-  silent
+codewars :: IO Formatter
+codewars = do
+  times <- newIORef ([ ]::[Seconds])
+  pure $ silent
     {
       formatterGroupStarted = \path -> do
         writeLine ""
-        writeLine $ "<DESCRIBE::>" ++ (getName path)
+        startedOn <- getRealTime
+        liftIO $ modifyIORef times (\ts -> startedOn : ts)
+        writeLine $ escapeLF $ "<DESCRIBE::>" ++ (getName path)
       ,formatterGroupDone = \_ -> do
         writeLine ""
-        writeLine $ "<COMPLETEDIN::>"
+        ts <- liftIO $ readIORef times
+        now <- getRealTime
+        let startedOn = head ts
+        let duration = now - startedOn
+        writeLine $ "<COMPLETEDIN::> " ++ (formatToMillis $ duration)
+        liftIO $ modifyIORef times tail
       ,formatterItemStarted = \path -> do
         writeLine ""
-        writeLine $ "<IT::>" ++ (getName path)
+        writeLine $ escapeLF $ "<IT::>" ++ (getName path)
       ,formatterItemDone = \_ item -> do
         writeLine ""
         writeLine $ reportItem item

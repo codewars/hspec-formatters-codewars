@@ -14,7 +14,8 @@ import qualified Spec
 
 main :: IO ()
 main = do
-  summary <- safeTry $ runSpec Spec.spec defaultConfig {configFormat = Just $ formatterToFormat codewars}
+  formatter <- codewars
+  summary <- safeTry $ runSpec Spec.spec defaultConfig {configFormat = Just $ formatterToFormat formatter}
   case summary of
     Left ex -> do
       putStrLn $ "\n<ERROR::>Test suite crashed<:LF:>" ++ (escapeLF $ formatException ex)
