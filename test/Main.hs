@@ -6,7 +6,7 @@ import Data.Text (pack, replace, unpack)
 import System.Exit
 
 import Test.Hspec.Runner
-import Test.Hspec.Formatters.Codewars (codewars)
+import Test.Hspec.Formatters.Codewars (codewars, escapeLF)
 import Test.Hspec.Core.Formatters.V2 (formatterToFormat, formatException)
 import Test.Hspec.Core.Util (safeTry)
 
@@ -21,6 +21,3 @@ main = do
       putStrLn $ "\n<ERROR::>Test suite crashed<:LF:>" ++ (escapeLF $ formatException ex)
       exitFailure
     Right s -> evaluateSummary s
-
-escapeLF :: String -> String
-escapeLF = unpack . replace "\n" "<:LF:>" . pack

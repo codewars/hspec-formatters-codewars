@@ -1,14 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Test.Hspec.Formatters.Codewars (codewars) where
+module Test.Hspec.Formatters.Codewars (codewars, escapeLF) where
+
 import Data.Text (pack, replace, unpack)
 import Text.Printf (printf)
 import Data.IORef
 import Control.Monad.IO.Class
-
-import Test.Hspec.Core.Util (
-  Path
- )
+import Test.Hspec.Core.Util (Path)
 
 import Test.Hspec.Core.Formatters.V2 (
   FailureReason (..),
