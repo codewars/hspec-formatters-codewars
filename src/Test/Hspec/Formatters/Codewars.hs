@@ -31,7 +31,7 @@ codewars = do
       formatterGroupStarted = \path -> do
         writeLine ""
         startedOn <- getRealTime
-        liftIO $ modifyIORef times (\ts -> startedOn : ts)
+        liftIO $ modifyIORef times (startedOn : )
         writeLine $ "<DESCRIBE::>" ++ (getName path)
       ,formatterGroupDone = \_ -> do
         writeLine ""
