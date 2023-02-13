@@ -39,7 +39,7 @@ codewars = do
         now <- getRealTime
         let startedOn = head ts
         let duration = now - startedOn
-        writeLine $ "<COMPLETEDIN::> " ++ (formatToMillis $ duration)
+        writeLine $ "<COMPLETEDIN::>" ++ (formatToMillis $ duration)
         liftIO $ modifyIORef times tail
       ,formatterItemStarted = \path -> do
         writeLine ""
