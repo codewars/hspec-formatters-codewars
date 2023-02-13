@@ -2,7 +2,6 @@
 
 module Main (main) where
 
-import Data.Text (pack, replace, unpack)
 import System.Exit
 
 import Test.Hspec.Runner
