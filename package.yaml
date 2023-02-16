@@ -49,6 +49,7 @@ tests:
     - hspec-core >= 2.8
     - hspec-formatters-codewars
     - QuickCheck
+    - silently
     verbatim:
       build-tool-depends:
         hspec-discover:hspec-discover
