@@ -1,13 +1,11 @@
 module Main (main) where
 
-import System.Exit
-
-import Test.Hspec.Runner
-import Test.Hspec.Formatters.Codewars (newFormatter, escapeLF)
-import Test.Hspec.Core.Formatters.V2 (formatterToFormat, formatException)
-import Test.Hspec.Core.Util (safeTry)
-
 import qualified Spec
+import System.Exit
+import Test.Hspec.Core.Formatters.V2 (formatException, formatterToFormat)
+import Test.Hspec.Core.Util (safeTry)
+import Test.Hspec.Formatters.Codewars (escapeLF, newFormatter)
+import Test.Hspec.Runner
 
 main :: IO ()
 main = do
