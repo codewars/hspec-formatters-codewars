@@ -2,62 +2,61 @@
 
 module Test.Hspec.Formatters.Codewars (newFormatter, escapeLF) where
 
-import Data.Text (pack, replace, unpack)
-import Text.Printf (printf)
-import Data.IORef
 import Control.Monad.IO.Class
+import Data.IORef
+import Data.Text (pack, replace, unpack)
+import Test.Hspec.Core.Formatters.V2
+  ( FailureReason (..),
+    Formatter (..),
+    Item (..),
+    Result (..),
+    Seconds (..),
+    formatException,
+    getRealTime,
+    silent,
+    writeLine,
+  )
 import Test.Hspec.Core.Util (Path)
-
-import Test.Hspec.Core.Formatters.V2 (
-  FailureReason (..),
-  Formatter     (..),
-  Item          (..),
-  Seconds       (..),
-  Result        (..),
-  formatException,
-  silent,
-  writeLine,
-  getRealTime
- )
+import Text.Printf (printf)
 
 getName :: Path -> String
 getName (_, req) = escapeLF req
 
 newFormatter :: IO Formatter
 newFormatter = do
-  times <- newIORef ([ ]::[Seconds])
-  pure $ silent
-    {
-      formatterGroupStarted = \path -> do
-        writeLine ""
-        startedOn <- getRealTime
-        liftIO $ modifyIORef times (startedOn : )
-        writeLine $ "<DESCRIBE::>" ++ (getName path)
-      ,formatterGroupDone = \_ -> do
-        writeLine ""
-        ts <- liftIO $ readIORef times
-        now <- getRealTime
-        let startedOn = head ts
-        let duration = now - startedOn
-        writeLine $ "<COMPLETEDIN::>" ++ (formatToMillis $ duration)
-        liftIO $ modifyIORef times tail
-      ,formatterItemStarted = \path -> do
-        writeLine ""
-        writeLine $ "<IT::>" ++ (getName path)
-      ,formatterItemDone = \_ item -> do
-        writeLine ""
-        writeLine $ reportItem item
-        writeLine ""
-        writeLine $ "<COMPLETEDIN::>" ++ (formatToMillis $ itemDuration item)
-    }
+  times <- newIORef ([] :: [Seconds])
+  pure $
+    silent
+      { formatterGroupStarted = \path -> do
+          writeLine ""
+          startedOn <- getRealTime
+          liftIO $ modifyIORef times (startedOn :)
+          writeLine $ "<DESCRIBE::>" ++ (getName path),
+        formatterGroupDone = \_ -> do
+          writeLine ""
+          ts <- liftIO $ readIORef times
+          now <- getRealTime
+          let startedOn = head ts
+          let duration = now - startedOn
+          writeLine $ "<COMPLETEDIN::>" ++ (formatToMillis $ duration)
+          liftIO $ modifyIORef times tail,
+        formatterItemStarted = \path -> do
+          writeLine ""
+          writeLine $ "<IT::>" ++ (getName path),
+        formatterItemDone = \_ item -> do
+          writeLine ""
+          writeLine $ reportItem item
+          writeLine ""
+          writeLine $ "<COMPLETEDIN::>" ++ (formatToMillis $ itemDuration item)
+      }
 
 reportItem :: Item -> String
 reportItem item =
   case itemResult item of
     Success -> "<PASSED::>Test Passed"
     Failure _ reason -> reasonAsString reason
-    Pending _  Nothing -> "<FAILED::>Test pending: no reason given"
-    Pending _  (Just msg) -> "<FAILED::>Test pending: " ++ (escapeLF msg)
+    Pending _ Nothing -> "<FAILED::>Test pending: no reason given"
+    Pending _ (Just msg) -> "<FAILED::>Test pending: " ++ (escapeLF msg)
 
 reasonAsString :: FailureReason -> String
 reasonAsString reason =
@@ -72,7 +71,6 @@ reasonAsString reason =
       "<ERROR::>uncaught exception: " ++ (escapeLF $ formatException err)
     Error (Just s) err ->
       "<ERROR::>" ++ (escapeLF s) ++ "<:LF:>" ++ (escapeLF $ formatException err)
-
 
 formatToMillis :: Seconds -> String
 formatToMillis (Seconds s) = printf "%.3f" (s * 1000)
