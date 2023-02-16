@@ -8,15 +8,19 @@ Specify `codewars` formatter:
 
 ```haskell
 -- test/Main.hs
-module Main where
+module Main (main) where
 
 import Test.Hspec.Runner
-import Test.Hspec.Formatters.Codewars (codewars)
+import Test.Hspec.Formatters.Codewars (newFormatter)
+import Test.Hspec.Core.Formatters.V2 (formatterToFormat)
 
 import qualified Spec
 
 main :: IO ()
-main = hspecWith defaultConfig {configFormatter = Just codewars} Spec.spec
+main = do
+  codewars <- newFormatter
+  runSpec Spec.spec defaultConfig {configFormat = Just $ formatterToFormat codewars}
+  >>= evaluateSummary
 ```
 
 ```haskell
