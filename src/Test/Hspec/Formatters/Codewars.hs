@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Test.Hspec.Formatters.Codewars (codewars, escapeLF) where
+module Test.Hspec.Formatters.Codewars (newFormatter, escapeLF) where
 
 import Data.Text (pack, replace, unpack)
 import Text.Printf (printf)
@@ -23,8 +23,8 @@ import Test.Hspec.Core.Formatters.V2 (
 getName :: Path -> String
 getName (_, req) = escapeLF req
 
-codewars :: IO Formatter
-codewars = do
+newFormatter :: IO Formatter
+newFormatter = do
   times <- newIORef ([ ]::[Seconds])
   pure $ silent
     {
