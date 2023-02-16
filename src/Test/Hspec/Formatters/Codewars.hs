@@ -1,50 +1,81 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Test.Hspec.Formatters.Codewars (codewars) where
+module Test.Hspec.Formatters.Codewars (codewars, escapeLF) where
 
 import Data.Text (pack, replace, unpack)
+import Text.Printf (printf)
+import Data.IORef
+import Control.Monad.IO.Class
+import Test.Hspec.Core.Util (Path)
 
-import Test.Hspec.Core.Formatters.V1 (
+import Test.Hspec.Core.Formatters.V2 (
   FailureReason (..),
-  Formatter (..),
+  Formatter     (..),
+  Item          (..),
+  Seconds       (..),
+  Result        (..),
   formatException,
   silent,
   writeLine,
+  getRealTime
  )
 
-codewars :: Formatter
-codewars =
-  silent
-    { exampleGroupStarted = \_ name -> do
+getName :: Path -> String
+getName (_, req) = escapeLF req
+
+codewars :: IO Formatter
+codewars = do
+  times <- newIORef ([ ]::[Seconds])
+  pure $ silent
+    {
+      formatterGroupStarted = \path -> do
         writeLine ""
-        writeLine $ escapeLF $ "<DESCRIBE::>" ++ name
-    , exampleGroupDone = writeLine "\n<COMPLETEDIN::>"
-    , exampleSucceeded = \(_, name) _ -> do
+        startedOn <- getRealTime
+        liftIO $ modifyIORef times (startedOn : )
+        writeLine $ "<DESCRIBE::>" ++ (getName path)
+      ,formatterGroupDone = \_ -> do
         writeLine ""
-        writeLine $ escapeLF $ "<IT::>" ++ name
-        writeLine "\n<PASSED::>Test Passed"
-        writeLine "\n<COMPLETEDIN::>"
-    , exampleFailed = \(_, name) _ reason -> do
+        ts <- liftIO $ readIORef times
+        now <- getRealTime
+        let startedOn = head ts
+        let duration = now - startedOn
+        writeLine $ "<COMPLETEDIN::>" ++ (formatToMillis $ duration)
+        liftIO $ modifyIORef times tail
+      ,formatterItemStarted = \path -> do
         writeLine ""
-        writeLine $ escapeLF $ "<IT::>" ++ name
+        writeLine $ "<IT::>" ++ (getName path)
+      ,formatterItemDone = \_ item -> do
         writeLine ""
-        writeLine $ escapeLF $ reasonAsString reason
-        writeLine "\n<COMPLETEDIN::>"
+        writeLine $ reportItem item
+        writeLine ""
+        writeLine $ "<COMPLETEDIN::>" ++ (formatToMillis $ itemDuration item)
     }
+
+reportItem :: Item -> String
+reportItem item =
+  case itemResult item of
+    Success -> "<PASSED::>Test Passed"
+    Failure _ reason -> reasonAsString reason
+    Pending _  Nothing -> "<FAILED::>Test pending: no reason given"
+    Pending _  (Just msg) -> "<FAILED::>Test pending: " ++ (escapeLF msg)
 
 reasonAsString :: FailureReason -> String
 reasonAsString reason =
   case reason of
     NoReason -> "<FAILED::>Test Failed"
-    Reason x -> "<FAILED::>" ++ x
+    Reason x -> "<FAILED::>" ++ (escapeLF x)
     ExpectedButGot Nothing expected got ->
-      "<FAILED::>Expected " ++ expected ++ " but got " ++ got
+      "<FAILED::>expected: " ++ (escapeLF expected) ++ "<:LF:> but got: " ++ (escapeLF got)
     ExpectedButGot (Just src) expected got ->
-      "<FAILED::>" ++ src ++ " expected " ++ expected ++ " but got " ++ got
+      "<FAILED::>" ++ (escapeLF src) ++ "<:LF:>expected: " ++ (escapeLF expected) ++ "<:LF:> but got: " ++ (escapeLF got)
     Error Nothing err ->
-      "<ERROR::>" ++ formatException err
+      "<ERROR::>uncaught exception: " ++ (escapeLF $ formatException err)
     Error (Just s) err ->
-      "<ERROR::>" ++ s ++ formatException err
+      "<ERROR::>" ++ (escapeLF s) ++ "<:LF:>" ++ (escapeLF $ formatException err)
+
+
+formatToMillis :: Seconds -> String
+formatToMillis (Seconds s) = printf "%.3f" (s * 1000)
 
 escapeLF :: String -> String
 escapeLF = unpack . replace "\n" "<:LF:>" . pack
